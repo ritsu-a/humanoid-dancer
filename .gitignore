@@ -1,4 +1,7 @@
 
+legged_gym/resources/motions
+
+
 *.json
 
 # Byte-compiled / optimized / DLL files

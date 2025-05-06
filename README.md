@@ -56,7 +56,7 @@ Our parameters are managed by a lightweight command-line interface [tyro](https:
 - Train a walking policy for H1:
 
 ```
-python legged_gym/scripts/train.py --max-iterations 10000 env-cfg:h1-cfg train-cfg:h1-cfg        
+python legged_gym/scripts/train.py --max-iterations 10000 env-cfg:h1-cfg train-cfg:h1-ppo-cfg      
 ```
 
 - Train a DeepMimic-styled imitation policy for H1:
@@ -123,6 +123,24 @@ To fix it, you need change your system path by
 ```
 export LD_LIBRARY_PATH=#HOME/miniconda3/envs/dancer/lib::$LD_LIBRARY_PATH
 ```
+
+Or adjust your conda env to initialize LD_LIBRARY_PATH
+
+create file $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+write the following into file
+'''
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib
+'''
+
+create file $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
+write the following into file
+'''
+ORIGINAL_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+DIRECTORY_TO_REMOVE="$CONDA_PREFIX/lib"
+NEW_LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | tr ':' '\n' | grep -v "$DIRECTORY_TO_REMOVE" | tr '\n' ':' | sed 's/:$//')
+export LD_LIBRARY_PATH=$NEW_LD_LIBRARY_PATH
+'''
+
 
 2. When you try to use GUI, it reports
 
