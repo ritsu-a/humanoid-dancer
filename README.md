@@ -1,4 +1,6 @@
 # Humanoid Dancer
+Refer to random file for useful scripts.
+
 
 ## 💻 Installation
 

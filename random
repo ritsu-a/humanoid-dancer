@@ -23,9 +23,17 @@ visualize amass_phc_filtered data:
 python legged_gym/scripts/vis.py env-cfg:h1-mimic-cfg --env-cfg.motion.sync --env-cfg.viewer.debug_viz --env-cfg.motion.motion-file resources/motions/h1/amass_phc_filtered.pkl
 
 
-
 visualize unitree g1 dancing:
 python legged_gym/scripts/vis.py env-cfg:g1-mimic-cfg --env-cfg.motion.sync --env-cfg.viewer.debug_viz --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl
 
 TODO:
-bug at right hand reference position
+1. bug at right hand reference position
+     seems like just visualization issue, the tracked robot motion is fine
+
+2. https://github.com/unitreerobotics/unitree_rl_gym/blob/main/deploy/deploy_mujoco/deploy_mujoco.py
+    try to deploy mujoco  
+
+3. try ARAP rewards
+
+4. how about gait? pre-compute gait for given motion
+
