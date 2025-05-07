@@ -128,18 +128,18 @@ Or adjust your conda env to initialize LD_LIBRARY_PATH
 
 create file $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
 write the following into file
-'''
+```
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib
-'''
+```
 
 create file $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
 write the following into file
-'''
+```
 ORIGINAL_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 DIRECTORY_TO_REMOVE="$CONDA_PREFIX/lib"
 NEW_LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | tr ':' '\n' | grep -v "$DIRECTORY_TO_REMOVE" | tr '\n' ':' | sed 's/:$//')
 export LD_LIBRARY_PATH=$NEW_LD_LIBRARY_PATH
-'''
+```
 
 
 2. When you try to use GUI, it reports
