@@ -6,12 +6,12 @@ from isaacgym.torch_utils import to_torch
 from loguru import logger
 from smpl_sim.poselib.skeleton.skeleton3d import SkeletonTree
 
-from legged_gym.motions.motion_lib_h1 import MotionLibH1
+from legged_gym.motions.motion_lib_g1 import MotionLibG1
 from legged_gym.utils import torch_utils
-from .h1_robot import H1Robot
-from .h1_mimic_config import Motion
+from .g1_robot import G1Robot
+from .g1_mimic_config import Motion
 
-class H1Mimic(H1Robot):
+class G1Mimic(G1Robot):
     def _parse_cfg(self, cfg):
         super()._parse_cfg(cfg)
         self.cfg.motion.resample_motions_for_envs_interval = np.ceil(self.cfg.motion.resample_motions_for_envs_interval_s / self.dt)
@@ -76,17 +76,21 @@ class H1Mimic(H1Robot):
         dof_diff = ref_dof_pos.view(B, 1, -1) - self.dof_pos.view(B, 1, -1)
         dof_vel_diff = ref_dof_vel.view(B, 1, -1) - self.dof_vel.view(B, 1, -1)
 
+        sin_phase = torch.sin(2 * np.pi * self.phase ).unsqueeze(1)
+        cos_phase = torch.cos(2 * np.pi * self.phase ).unsqueeze(1)
         self.obs_buf = torch.cat((  
                                     # self obs
                                     self.base_ang_vel  * self.obs_scales.ang_vel,
                                     self.projected_gravity,
-                                    self.commands[:, :3] * self.commands_scale * 0, # do not use commands
+                                    # self.commands[:, :3] * self.commands_scale * 0, # do not use commands
                                     (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
                                     self.dof_vel * self.obs_scales.dof_vel,
                                     self.actions,
                                     self.base_lin_vel * self.obs_scales.lin_vel,
+                                    sin_phase,
+                                    cos_phase,
                                     
-                                    # task obs (6 + 3 + 3 + 19 * 2 = 50)
+                                    # task obs (6 + 3 + 3 + 23 * 2 = 58)
                                     torch_utils.quat_to_tan_norm(diff_local_body_rot_flat).view(B, -1),
                                     diff_local_root_vel.view(B, -1) * self.obs_scales.lin_vel,
                                     diff_local_root_ang_vel.view(B, -1) * self.obs_scales.ang_vel,
@@ -119,7 +123,7 @@ class H1Mimic(H1Robot):
     
     def _reset_root_states(self, env_ids):
         if self.custom_origins:
-            raise NotImplementedError("Custom origins not implemented for H1Mimic")
+            raise NotImplementedError("Custom origins not implemented for G1Mimic")
         else:
             motion_times = (self.episode_length_buf) * self.dt + self.motion_start_times 
             offset = self.env_origins
@@ -193,7 +197,9 @@ class H1Mimic(H1Robot):
         cfg_motion: Motion = self.cfg.motion
         motion_path = cfg_motion.motion_file
         skeleton_path = cfg_motion.skeleton_file
-        self._motion_lib = MotionLibH1(
+
+        
+        self._motion_lib = MotionLibG1(
             motion_file=motion_path, device=self.device, 
             masterfoot_conifg=None, fix_height=False,
             multi_thread=False, mjcf_file=skeleton_path, 
@@ -332,6 +338,8 @@ class H1Mimic(H1Robot):
         diff_dof_pos = ref_dof_pos - dof_pos
         # scale the diff by self.cfg.rewards.tracking_joint_pos_selection
         for joint_name, scale in self.cfg.rewards.tracking_joint_pos_selection.items():
+            # import ipdb 
+            # ipdb.set_trace()
             joint_index = self.dof_names.index(joint_name)
             assert joint_index >= 0, f"Joint {joint_name} not found in the robot"
             

@@ -33,8 +33,7 @@ class HumanoidBatch:
             head_length = 0.75
             self._offsets = torch.cat((self._offsets, torch.tensor([[[0, 0, head_length]]]).to(device)), dim = 1).to(device)
             self._local_rotation = torch.cat((self._local_rotation, torch.tensor([[[1, 0, 0, 0]]]).to(device)), dim = 1).to(device)
-            
-        
+
         self.joints_range = mjcf_data['joints_range'].to(device)
         self._local_rotation_mat = tRot.quaternion_to_matrix(self._local_rotation).float() # w, x, y ,z
         
@@ -71,15 +70,20 @@ class HumanoidBatch:
             curr_index = node_index
             node_index += 1
             all_joints = xml_node.findall("joint")
+            if len(all_joints) == 6:
+                all_joints = all_joints[6:]
             for joint in all_joints:
                 if not joint.attrib.get("range") is None: 
                     joints_range.append(np.fromstring(joint.attrib.get("range"), dtype=float, sep=" "))
-            
+                else:
+                    if not joint.attrib.get("type") == "free":
+                        joints_range.append([-np.pi, np.pi])
             for next_node in xml_node.findall("body"):
                 node_index = _add_xml_node(next_node, curr_index, node_index)
             return node_index
         
         _add_xml_node(xml_body_root, -1, 0)
+
         return {
             "node_names": node_names,
             "parent_indices": torch.from_numpy(np.array(parent_indices, dtype=np.int32)),
@@ -93,12 +97,13 @@ class HumanoidBatch:
         device, dtype = pose.device, pose.dtype
         pose_input = pose.clone()
         B, seq_len = pose.shape[:2]
+
         pose = pose[..., :len(self._parents), :] # H1 fitted joints might have extra joints
-        if self.extend_hand and self.extend_head and pose.shape[-2] == 22:
-            pose = torch.cat([pose, torch.zeros(B, seq_len, 1, 3).to(device).type(dtype)], dim = -2) # adding hand and head joints
+        # if self.extend_hand and self.extend_head and pose.shape[-2] == 22:
+        #     pose = torch.cat([pose, torch.zeros(B, seq_len, 1, 3).to(device).type(dtype)], dim = -2) # adding hand and head joints
 
         if convert_to_mat:
-            pose_quat = tRot.axis_angle_to_quaternion(pose)
+            pose_quat = tRot.axis_angle_to_quaternion(pose.clone())
             pose_mat = tRot.quaternion_to_matrix(pose_quat)
         else:
             pose_mat = pose
@@ -106,6 +111,7 @@ class HumanoidBatch:
             pose_mat = pose_mat.reshape(B, seq_len, -1, 3, 3)
         J = pose_mat.shape[2] - 1  # Exclude root
         
+
         wbody_pos, wbody_mat = self.forward_kinematics_batch(pose_mat[:, :, 1:], pose_mat[:, :, 0:1], trans)
         
         return_dict = EasyDict()
@@ -173,11 +179,15 @@ class HumanoidBatch:
                 positions_world.append(root_positions)
                 rotations_world.append(root_rotations)
             else:
-                jpos = (torch.matmul(rotations_world[self._parents[i]][:, :, 0], expanded_offsets[:, :, i, :, None]).squeeze(-1) + positions_world[self._parents[i]])
-                rot_mat = torch.matmul(rotations_world[self._parents[i]], torch.matmul(self._local_rotation_mat[:,  (i):(i + 1)], rotations[:, :, (i - 1):i, :]))
+                try:
+                    jpos = (torch.matmul(rotations_world[self._parents[i]][:, :, 0], expanded_offsets[:, :, i, :, None]).squeeze(-1) + positions_world[self._parents[i]])
+                    rot_mat = torch.matmul(rotations_world[self._parents[i]], torch.matmul(self._local_rotation_mat[:,  (i):(i + 1)], rotations[:, :, (i - 1):i, :]))
+                    
                 # rot_mat = torch.matmul(rotations_world[self._parents[i]], rotations[:, :, (i - 1):i, :])
                 # print(rotations[:, :, (i - 1):i, :].shape, self._local_rotation_mat.shape)
-                
+                except Exception as e:
+                    
+                    import ipdb; ipdb.set_trace()
                 positions_world.append(jpos)
                 rotations_world.append(rot_mat)
         

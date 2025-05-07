@@ -11,8 +11,8 @@ from legged_gym.utils import task_registry
 
 @dataclass  
 class Args:
-    env_cfg: Union[h1_config.H1Cfg, h1_mimic_config.H1MimicCfg] = field(default_factory=h1_config.H1Cfg)
-    train_cfg: Union[h1_config.H1PPOCfg, h1_mimic_config.H1MimicPPOCfg] = field(default_factory=h1_config.H1PPOCfg)
+    env_cfg: Union[h1_config.H1Cfg, h1_mimic_config.H1MimicCfg, g1_mimic_config.G1MimicCfg] = field(default_factory=h1_config.H1Cfg)
+    train_cfg: Union[h1_config.H1PPOCfg, h1_mimic_config.H1MimicPPOCfg, g1_mimic_config.G1MimicPPOCfg] = field(default_factory=h1_config.H1PPOCfg)
     # Resume training from a checkpoint
     resume: bool = False
     # Name of the experiment to run or load. Overrides config file if provided.
