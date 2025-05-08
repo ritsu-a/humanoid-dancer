@@ -79,6 +79,16 @@ class LeggedRobot(BaseTask):
             self.privileged_obs_buf = torch.clip(self.privileged_obs_buf, -clip_obs, clip_obs)
         return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras
 
+    def _pre_compute_observations_callback(self):
+        # prepare quantities
+        self.base_pos[:] = self.root_states[:, 0:3]
+        self.base_quat[:] = self.root_states[:, 3:7]
+        self.rpy[:] = get_euler_xyz_in_tensor(self.base_quat[:])
+        self.base_lin_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
+        self.base_ang_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
+        self.projected_gravity[:] = quat_rotate_inverse(self.base_quat, self.gravity_vec)
+
+
     def post_physics_step(self):
         """ check terminations, compute observations and rewards
             calls self._post_physics_step_callback() for common computations 
@@ -90,13 +100,9 @@ class LeggedRobot(BaseTask):
         self.episode_length_buf += 1
         self.common_step_counter += 1
 
-        # prepare quantities
-        self.base_pos[:] = self.root_states[:, 0:3]
-        self.base_quat[:] = self.root_states[:, 3:7]
-        self.rpy[:] = get_euler_xyz_in_tensor(self.base_quat[:])
-        self.base_lin_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
-        self.base_ang_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
-        self.projected_gravity[:] = quat_rotate_inverse(self.base_quat, self.gravity_vec)
+       
+        self._pre_compute_observations_callback()
+        
 
         self._post_physics_step_callback()
 

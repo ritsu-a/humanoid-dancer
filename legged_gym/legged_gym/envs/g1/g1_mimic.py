@@ -142,6 +142,24 @@ class G1Mimic(G1Robot):
                                                      gymtorch.unwrap_tensor(self.root_states),
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
+    def _pre_compute_observations_callback(self):
+        super()._pre_compute_observations_callback()
+        offset = self.env_origins
+        motion_times = (self.episode_length_buf ) * self.dt + self.motion_start_times 
+        motion_res = self._get_state_from_motionlib_cache_trimesh(self.motion_ids, motion_times, offset= offset)
+
+
+
+        self.ref_dof_pos = motion_res['dof_pos']
+        self.ref_dof_vel = motion_res['dof_vel']
+
+
+
+        self.ref_body_pos = motion_res["rg_pos"]
+        self.ref_body_vel = motion_res["body_vel"]
+        self.ref_body_rot = motion_res["rb_rot"]
+        self.ref_body_ang_vel = motion_res["body_ang_vel"]
+
 
     def post_physics_step(self):
         super().post_physics_step()
@@ -305,15 +323,64 @@ class G1Mimic(G1Robot):
                 gymutil.draw_lines(sphere_geom_marker, self.gym, self.viewer, self.envs[env_id], sphere_pose) 
                 
     #------------ reward functions----------------
+    def _reward_penalty_action_rate(self):
+        # Penalize changes in actions
+        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
+
+    def _reward_penalty_slippage(self):
+        foot_vel = self.rigid_body_states[:, :, 7:10][:, self.feet_indices]
+        return torch.sum(torch.norm(foot_vel, dim=-1) * (self.contact_forces[:, self.feet_indices, 2] > 1.), dim=1)
     
+    def _reward_tracking_body_position(self):
+        body_pos = self.rigid_body_states[:, :, :3]
+        ref_body_pos = self.ref_body_pos
+        
+        diff_global_body_pos = ref_body_pos - body_pos
+        diff_global_body_pos_dist = (diff_global_body_pos**2).mean(dim=-1)
+        r_pos = torch.exp(-diff_global_body_pos_dist / self.cfg.rewards.tracking_body_pos_sigma).mean(dim=-1)
+        return r_pos
+
+    def _reward_tracking_body_position_feet(self):
+        body_pos = self.rigid_body_states[:, self.feet_indices, :3]
+        ref_body_pos = self.ref_body_pos[:, self.feet_indices, :]
+        
+        diff_global_body_pos = ref_body_pos - body_pos
+        diff_global_body_pos_dist = (diff_global_body_pos**2).mean(dim=-1)
+        r_pos = torch.exp(-diff_global_body_pos_dist / self.cfg.rewards.tracking_body_pos_feet_sigma).mean(dim=-1)
+        return r_pos
+    
+    def _reward_tracking_body_velocity(self):
+        body_vel = self.rigid_body_states[:, :, 7:10]
+        ref_body_vel = self.ref_body_vel
+        
+        diff_global_body_vel = ref_body_vel - body_vel
+        diff_global_body_vel_dist = (diff_global_body_vel**2).mean(dim=-1)
+        r_vel = torch.exp(-diff_global_body_vel_dist / self.cfg.rewards.tracking_body_vel_sigma).mean(dim=-1)
+        return r_vel
+
+    def _reward_tracking_body_rotation(self):
+        body_rot = self.rigid_body_states[:, :, 3:7]
+        ref_body_rot = self.ref_body_rot
+        diff_global_body_rot = torch_utils.quat_mul(ref_body_rot, torch_utils.quat_conjugate(body_rot))
+        diff_global_body_angle = torch_utils.quat_to_angle_axis(diff_global_body_rot)[0]
+        diff_global_body_angle_dist = (diff_global_body_angle**2).mean(dim=-1)
+        r_rot = torch.exp(-diff_global_body_angle_dist / self.cfg.rewards.tracking_body_rot_sigma)
+        return r_rot
+    
+    def _reward_tracking_body_ang_velocity(self):
+        body_ang_vel = self.rigid_body_states[:, :, 10:13]
+        ref_body_ang_vel = self.ref_body_ang_vel
+        
+        diff_global_body_ang_vel = ref_body_ang_vel - body_ang_vel
+        diff_global_body_ang_vel_dist = (diff_global_body_ang_vel**2).mean(dim=-1)
+        r_ang_vel = torch.exp(-diff_global_body_ang_vel_dist / self.cfg.rewards.tracking_body_ang_vel_sigma).mean(dim=-1)
+        return r_ang_vel
+
     def _reward_feet_air_time_tracking(self):
         # Reward long steps
         # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
-        offset = self.env_origins
-        motion_times = (self.episode_length_buf ) * self.dt + self.motion_start_times 
-        motion_res = self._get_state_from_motionlib_cache_trimesh(self.motion_ids, motion_times, offset= offset)
-
-        ref_body_vel = motion_res['body_vel']
+       
+        ref_body_vel = self.ref_body_vel
         
         
         contact = self.contact_forces[:, self.feet_indices, 2] > 1.
@@ -326,14 +393,11 @@ class G1Mimic(G1Robot):
         self.feet_air_time *= ~contact_filt
         return rew_airTime
     
+
+    ### dof angle error 
     def _reward_tracking_selected_joint_position(self):
         dof_pos = self.dof_pos
-        
-        offset = self.env_origins
-        motion_times = (self.episode_length_buf ) * self.dt + self.motion_start_times # next frames so +1
-        # motion_res = self._get_state_from_motionlib_cache(self.motion_ids, motion_times, offset=offset)
-        motion_res = self._get_state_from_motionlib_cache_trimesh(self.motion_ids, motion_times, offset= offset)
-        ref_dof_pos = motion_res['dof_pos']
+        ref_dof_pos = self.ref_dof_pos
         
         diff_dof_pos = ref_dof_pos - dof_pos
         # scale the diff by self.cfg.rewards.tracking_joint_pos_selection
@@ -348,14 +412,11 @@ class G1Mimic(G1Robot):
         r_dof_pos = torch.exp(-diff_dof_pos_dist / self.cfg.rewards.tracking_joint_pos_sigma)
         return r_dof_pos
     
+
+    ### dof angle velocity error
     def _reward_tracking_selected_joint_vel(self):
         dof_vel = self.dof_vel
-        
-        offset = self.env_origins
-        motion_times = (self.episode_length_buf ) * self.dt + self.motion_start_times # next frames so +1
-        # motion_res = self._get_state_from_motionlib_cache(self.motion_ids, motion_times, offset=offset)
-        motion_res = self._get_state_from_motionlib_cache_trimesh(self.motion_ids, motion_times, offset= offset)
-        ref_dof_vel = motion_res['dof_vel']
+        ref_dof_vel = self.ref_dof_vel
         
         diff_dof_vel = ref_dof_vel - dof_vel
         # scale the diff by self.cfg.rewards.tracking_joint_pos_selection
@@ -384,26 +445,19 @@ class G1Mimic(G1Robot):
     def _reward_tracking_root_vel(self):
         root_vel = self.base_lin_vel
         
-        offset = self.env_origins
-        motion_times = (self.episode_length_buf ) * self.dt + self.motion_start_times
-        motion_res = self._get_state_from_motionlib_cache_trimesh(self.motion_ids, motion_times, offset= offset)
-        ref_body_vel = motion_res['body_vel'][:, 0]
-        diff_global_body_vel = ref_body_vel - root_vel
+        ref_root_vel = self.ref_body_vel[:, 0]
+        diff_global_body_vel = ref_root_vel - root_vel
         diff_global_body_vel_dist = (diff_global_body_vel**2).mean(dim=-1)
-        r_vel = torch.exp(-diff_global_body_vel_dist / self.cfg.rewards.tracking_body_vel_sigma)
+        r_vel = torch.exp(-diff_global_body_vel_dist / self.cfg.rewards.tracking_body_vel_rot_sigma)
         return r_vel
     
     def _reward_tracking_root_ang_vel(self):
         body_ang_vel = self.base_ang_vel
 
-        offset = self.env_origins
-        motion_times = (self.episode_length_buf ) * self.dt + self.motion_start_times # next frames so +1
-        # motion_res = self._get_state_from_motionlib_cache(self.motion_ids, motion_times, offset=offset)
-        motion_res = self._get_state_from_motionlib_cache_trimesh(self.motion_ids, motion_times, offset= offset)
+        
+        ref_root_ang_vel = self.ref_body_ang_vel[:, 0]
 
-        ref_body_ang_vel = motion_res['body_ang_vel'][:, 0]
-
-        diff_global_ang_vel = ref_body_ang_vel - body_ang_vel
+        diff_global_ang_vel = ref_root_ang_vel - body_ang_vel
         diff_global_ang_vel_dist = (diff_global_ang_vel**2).mean(dim=-1).mean(dim=-1)
-        r_ang_vel = torch.exp(-diff_global_ang_vel_dist / self.cfg.rewards.tracking_body_ang_vel_sigma)
+        r_ang_vel = torch.exp(-diff_global_ang_vel_dist / self.cfg.rewards.tracking_body_ang_vel_rot_sigma)
         return r_ang_vel

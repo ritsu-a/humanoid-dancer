@@ -60,11 +60,18 @@ class Env(g1_config.Env):
 class Rewards(g1_config.Rewards):
     only_positive_rewards: bool = False
     max_contact_force: float = 500.0
-    tracking_joint_pos_sigma: float = 0.5
-    tracking_joint_vel_sigma: float = 10
+    tracking_joint_pos_sigma: float = 1.0
+    tracking_joint_vel_sigma: float = 1.0
+
+    tracking_body_pos_sigma: float = 0.1
+    tracking_body_pos_feet_sigma: float = 0.03
+    tracking_body_vel_sigma: float = 1.0
+    tracking_body_rot_sigma: float = 1.0
+    tracking_body_ang_vel_sigma: float = 1.0
+
     tracking_body_rot_sigma: float = 0.1
-    tracking_body_vel_sigma: float = 10
-    tracking_body_ang_vel_sigma: float = 10
+    tracking_body_vel_rot_sigma: float = 10
+    tracking_body_ang_vel_rot_sigma: float = 10
     
     tracking_joint_pos_selection: Dict[str, float] = field(default_factory=lambda: {
         # upper body
@@ -93,28 +100,48 @@ class Rewards(g1_config.Rewards):
     })
     
     scales: Dict[str, float] = field(default_factory=lambda: {
-        'torques': -0.00001,
-        'torque_limits': -2.,
-        'dof_acc': -0.000011,
-        'dof_vel': -0.004,
-        'lower_action_rate': -3.0,
-        'upper_action_rate': -0.625,
-        'dof_pos_limits': -100.0 * 1.25,
-        'termination': -200 * 1.25,
-        'feet_contact_forces': -0.75,
-        'stumble': -1000.0 * 1.25,
-        'feet_air_time_tracking': 1000,
-        'slippage': -30.0 * 1.25,
-        'feet_ori': -50.0 * 1.25,
-        'in_the_air': -200,
-        'orientation': -200.0,
-        'alive': 1.0,
-        'feet_max_height_for_this_air': -2500,
-        'tracking_selected_joint_position': 32 * 6,
-        'tracking_selected_joint_vel': 16,
-        'tracking_root_rotation': 20.0,
-        'tracking_root_vel': 8.0 * 6,
-        'tracking_root_ang_vel': 8.0 * 6,
+        # 'torques': -0.00001,
+        # 'torque_limits': -2.,
+        # 'dof_acc': -0.000011,
+        # 'dof_vel': -0.004,
+        # 'lower_action_rate': -3.0,
+        # 'upper_action_rate': -0.625,
+        # 'dof_pos_limits': -100.0 * 1.25,
+        # 'termination': -200 * 1.25,
+        # 'feet_contact_forces': -0.75,
+        # 'stumble': -1000.0 * 1.25,
+        # 'feet_air_time_tracking': 1000,
+        # 'slippage': -30.0 * 1.25,
+        # 'feet_ori': -50.0 * 1.25,
+        # 'in_the_air': -200,
+        # 'orientation': -200.0,
+        # 'alive': 1.0,
+        # 'feet_max_height_for_this_air': -2500,
+        # 'tracking_selected_joint_position': 32 * 6,
+        # 'tracking_selected_joint_vel': 16,
+        # 'tracking_root_rotation': 20.0,
+        # 'tracking_root_vel': 8.0 * 6,
+        # 'tracking_root_ang_vel': 8.0 * 6,
+
+        
+        'tracking_body_position':1.0,
+        'tracking_body_position_feet':2.1,
+        'tracking_body_velocity':0.5,
+        'tracking_body_rotation':0.5,
+        'tracking_body_ang_velocity':0.5,
+
+        'tracking_selected_joint_position': 0.75,
+        'tracking_selected_joint_vel': 0.5,
+
+        'torques': -0.000001,
+        'penalty_action_rate': -0.5,
+        'penalty_slippage': -1.0,
+
+        'dof_pos_limits': -10.0,
+        'dof_vel_limits': -5.0,
+        'torque_limits': -5.0,
+        'termination': -200.0,
+
     })
     
 @dataclass

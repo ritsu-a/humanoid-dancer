@@ -117,6 +117,35 @@ class Asset(humanoid_robot_config.Asset):
     waist_roll_name: Optional[str] = "waist_roll"
     waist_pitch_name: Optional[str] = "waist_pitch"
 
+    upper_body_joints: List[str] = field(default_factory=lambda: [
+        'left_shoulder_pitch_joint',   
+        'left_shoulder_roll_joint',
+        'left_shoulder_yaw_joint',
+        'left_elbow_joint',
+        'left_hand'
+        'right_shoulder_pitch_joint',
+        'right_shoulder_roll_joint',
+        'right_shoulder_yaw_joint',
+        'right_elbow_joint',
+        'waist_yaw_joint',
+        'waist_roll_joint',
+        'waist_pitch_joint',
+    ])
+    lower_body_joints: List[str] = field(default_factory=lambda: [
+        'left_hip_yaw_joint',
+        'left_hip_roll_joint',
+        'left_hip_pitch_joint',
+        'left_knee_joint',
+        'left_ankle_pitch_joint',
+        'left_ankle_roll_joint',
+        'right_hip_yaw_joint',
+        'right_hip_roll_joint',
+        'right_hip_pitch_joint',
+        'right_knee_joint',
+        'right_ankle_pitch_joint',
+        'right_ankle_roll_joint',
+    ])
+
 @dataclass
 class Rewards(humanoid_robot_config.Rewards):
     only_positive_rewards: bool = False # important for rl training
