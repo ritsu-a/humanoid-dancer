@@ -1,0 +1,20 @@
+0508:
+    now we can track g1 dancing!
+    any motion that supports HRI-retargeting can now be tracked on g1 
+
+    update v1 asap reward 
+
+
+
+
+TODO:
+    bayesian optimization or auto RL for hyper-parameter searching
+    random-start by ASAP  
+
+    https://github.com/edpsw/ASAP/blob/main/deploy/deploy_mujoco/deploy_g1_29_23.py
+        似乎有人写了一版asap的sim2sim
+
+
+    https://github.com/Hellod035/LeggedLab
+        抄一点reward
+

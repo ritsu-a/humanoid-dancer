@@ -170,10 +170,10 @@ class G1Mimic(G1Robot):
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
             self._draw_debug_vis()
             
-        if self.common_step_counter % self.cfg.motion.resample_motions_for_envs_interval == 0:
-            logger.info("Resampling motions for envs")
-            logger.info(f"common_step_counter: {self.common_step_counter}")
-            self.resample_motion()
+        # if self.common_step_counter % self.cfg.motion.resample_motions_for_envs_interval == 0:
+        #     logger.info("Resampling motions for envs")
+        #     logger.info(f"common_step_counter: {self.common_step_counter}")
+        #     self.resample_motion()
             
     def _motion_sync(self):
         num_motions = self._motion_lib.num_motions()
@@ -336,8 +336,8 @@ class G1Mimic(G1Robot):
         ref_body_pos = self.ref_body_pos
         
         diff_global_body_pos = ref_body_pos - body_pos
-        diff_global_body_pos_dist = (diff_global_body_pos**2).mean(dim=-1)
-        r_pos = torch.exp(-diff_global_body_pos_dist / self.cfg.rewards.tracking_body_pos_sigma).mean(dim=-1)
+        diff_global_body_pos_dist = (diff_global_body_pos**2).mean(dim=-1).mean(dim=-1)
+        r_pos = torch.exp(-diff_global_body_pos_dist / self.cfg.rewards.tracking_body_pos_sigma)
         return r_pos
 
     def _reward_tracking_body_position_feet(self):
@@ -345,8 +345,8 @@ class G1Mimic(G1Robot):
         ref_body_pos = self.ref_body_pos[:, self.feet_indices, :]
         
         diff_global_body_pos = ref_body_pos - body_pos
-        diff_global_body_pos_dist = (diff_global_body_pos**2).mean(dim=-1)
-        r_pos = torch.exp(-diff_global_body_pos_dist / self.cfg.rewards.tracking_body_pos_feet_sigma).mean(dim=-1)
+        diff_global_body_pos_dist = (diff_global_body_pos**2).mean(dim=-1).mean(dim=-1)
+        r_pos = torch.exp(-diff_global_body_pos_dist / self.cfg.rewards.tracking_body_pos_feet_sigma)
         return r_pos
     
     def _reward_tracking_body_velocity(self):
@@ -354,8 +354,17 @@ class G1Mimic(G1Robot):
         ref_body_vel = self.ref_body_vel
         
         diff_global_body_vel = ref_body_vel - body_vel
-        diff_global_body_vel_dist = (diff_global_body_vel**2).mean(dim=-1)
-        r_vel = torch.exp(-diff_global_body_vel_dist / self.cfg.rewards.tracking_body_vel_sigma).mean(dim=-1)
+        diff_global_body_vel_dist = (diff_global_body_vel**2).mean(dim=-1).mean(dim=-1)
+        r_vel = torch.exp(-diff_global_body_vel_dist / self.cfg.rewards.tracking_body_vel_sigma)
+        return r_vel
+    
+    def _reward_tracking_body_velocity_feet(self):
+        body_vel = self.rigid_body_states[:, self.feet_indices, 7:10]
+        ref_body_vel = self.ref_body_vel[:, self.feet_indices, :]
+        
+        diff_global_body_vel = ref_body_vel - body_vel
+        diff_global_body_vel_dist = (diff_global_body_vel**2).mean(dim=-1).mean(dim=-1)
+        r_vel = torch.exp(-diff_global_body_vel_dist / self.cfg.rewards.tracking_body_vel_feet_sigma)
         return r_vel
 
     def _reward_tracking_body_rotation(self):
@@ -372,8 +381,8 @@ class G1Mimic(G1Robot):
         ref_body_ang_vel = self.ref_body_ang_vel
         
         diff_global_body_ang_vel = ref_body_ang_vel - body_ang_vel
-        diff_global_body_ang_vel_dist = (diff_global_body_ang_vel**2).mean(dim=-1)
-        r_ang_vel = torch.exp(-diff_global_body_ang_vel_dist / self.cfg.rewards.tracking_body_ang_vel_sigma).mean(dim=-1)
+        diff_global_body_ang_vel_dist = (diff_global_body_ang_vel**2).mean(dim=-1).mean(dim=-1)
+        r_ang_vel = torch.exp(-diff_global_body_ang_vel_dist / self.cfg.rewards.tracking_body_ang_vel_sigma)
         return r_ang_vel
 
     def _reward_feet_air_time_tracking(self):

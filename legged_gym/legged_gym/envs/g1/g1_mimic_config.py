@@ -66,6 +66,7 @@ class Rewards(g1_config.Rewards):
     tracking_body_pos_sigma: float = 0.1
     tracking_body_pos_feet_sigma: float = 0.03
     tracking_body_vel_sigma: float = 1.0
+    tracking_body_vel_feet_sigma: float = 0.5
     tracking_body_rot_sigma: float = 1.0
     tracking_body_ang_vel_sigma: float = 1.0
 
@@ -125,13 +126,14 @@ class Rewards(g1_config.Rewards):
 
         
         'tracking_body_position':1.0,
-        'tracking_body_position_feet':2.1,
+        'tracking_body_position_feet':3.0,
         'tracking_body_velocity':0.5,
+        'tracking_body_velocity_feet':3.0,
         'tracking_body_rotation':0.5,
         'tracking_body_ang_velocity':0.5,
 
-        'tracking_selected_joint_position': 0.75,
-        'tracking_selected_joint_vel': 0.5,
+        'tracking_selected_joint_position': 1.5,
+        'tracking_selected_joint_vel': 1.0,
 
         'torques': -0.000001,
         'penalty_action_rate': -0.5,
@@ -143,6 +145,18 @@ class Rewards(g1_config.Rewards):
         'termination': -200.0,
 
     })
+
+
+
+@dataclass
+class DomainRand(legged_robot_config.DomainRand):
+    randomize_friction: bool = True
+    friction_range: List[float] = field(default_factory=lambda: [0.5, 1.25])
+    randomize_base_mass: bool = True
+    added_mass_range: List[float] = field(default_factory=lambda: [-1.0, 3.0])
+    push_robots: bool = True
+    push_interval_s: float = 5.0
+    max_push_vel_xy: float = 0.3
     
 @dataclass
 class G1MimicCfg:
@@ -152,7 +166,7 @@ class G1MimicCfg:
     init_state: g1_config.InitState = field(default_factory=g1_config.InitState)
     control: g1_config.Control = field(default_factory=g1_config.Control)
     asset: g1_config.Asset = field(default_factory=g1_config.Asset)
-    domain_rand: g1_config.DomainRand = field(default_factory=g1_config.DomainRand)
+    domain_rand: DomainRand = field(default_factory=DomainRand)
     rewards: Rewards = field(default_factory=Rewards)
     normalization: legged_robot_config.Normalization = field(default_factory=legged_robot_config.Normalization)
     noise: legged_robot_config.Noise = field(default_factory=legged_robot_config.Noise)

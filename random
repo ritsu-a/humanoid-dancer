@@ -13,12 +13,12 @@ python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:h1-mimic-cfg 
 
 train  g1 deepmimic:
 resume 
-python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl train-cfg:g1-mimic-ppo-cfg --train-cfg.runner.resume --train-cfg.runner.load-run /home/pengyang/codebase/playground/humanoid-dancer/legged_gym/logs/g1_mimic/May07_17-16-30_
+python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl train-cfg:g1-mimic-ppo-cfg --train-cfg.runner.resume --train-cfg.runner.load-run /home/pengyang/codebase/playground/humanoid-dancer/legged_gym/logs/g1_mimic/May08_20-56-29_
 new 
 python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl train-cfg:g1-mimic-ppo-cfg
 
 eval g1-deepmimic:
-python legged_gym/scripts/play.py --no-headless --load_run May07_18-18-13_ --num_envs 1 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl --env-cfg.viewer.debug-viz train-cfg:g1-mimic-ppo-cfg 
+python legged_gym/scripts/play.py --no-headless --load_run May12_17-52-38_ --num_envs 1 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl --env-cfg.viewer.debug-viz train-cfg:g1-mimic-ppo-cfg 
 
 
 visualize amass_phc_filtered data:
