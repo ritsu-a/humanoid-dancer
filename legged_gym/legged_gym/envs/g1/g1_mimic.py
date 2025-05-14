@@ -69,6 +69,8 @@ class G1Mimic(G1Robot):
         
         diff_global_root_vel = ref_root_vel.view(B, 1, 3) - root_vel.view(B, 1, 3)
         diff_local_root_vel = torch_utils.my_quat_rotate(heading_inv_rot.view(-1, 4), diff_global_root_vel.view(-1, 3))
+
+        ref_local_root_vel = torch_utils.my_quat_rotate(heading_inv_rot.view(-1, 4), ref_root_vel.view(B, 3))
         
         diff_global_root_ang_vel = ref_root_ang_vel.view(B, 1, 3) - root_ang_vel.view(B, 1, 3)
         diff_local_root_ang_vel = torch_utils.my_quat_rotate(heading_inv_rot.view(-1, 4), diff_global_root_ang_vel.view(-1, 3))
@@ -78,6 +80,7 @@ class G1Mimic(G1Robot):
 
         sin_phase = torch.sin(2 * np.pi * self.phase ).unsqueeze(1)
         cos_phase = torch.cos(2 * np.pi * self.phase ).unsqueeze(1)
+
         self.obs_buf = torch.cat((  
                                     # self obs
                                     self.base_ang_vel  * self.obs_scales.ang_vel,
@@ -92,7 +95,8 @@ class G1Mimic(G1Robot):
                                     
                                     # task obs (6 + 3 + 3 + 23 * 2 = 58)
                                     torch_utils.quat_to_tan_norm(diff_local_body_rot_flat).view(B, -1),
-                                    diff_local_root_vel.view(B, -1) * self.obs_scales.lin_vel,
+                                    # diff_local_root_vel.view(B, -1) * self.obs_scales.lin_vel,
+                                    ref_local_root_vel.view(B, -1) * self.obs_scales.lin_vel, ## do not use root_vel
                                     diff_local_root_ang_vel.view(B, -1) * self.obs_scales.ang_vel,
                                     dof_diff.view(B, -1) * self.obs_scales.dof_pos,
                                     dof_vel_diff.view(B, -1) * self.obs_scales.dof_vel,
@@ -216,7 +220,6 @@ class G1Mimic(G1Robot):
         motion_path = cfg_motion.motion_file
         skeleton_path = cfg_motion.skeleton_file
 
-        
         self._motion_lib = MotionLibG1(
             motion_file=motion_path, device=self.device, 
             masterfoot_conifg=None, fix_height=False,

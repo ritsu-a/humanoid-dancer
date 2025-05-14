@@ -13,7 +13,7 @@ python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:h1-mimic-cfg 
 
 train  g1 deepmimic:
 resume 
-python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl train-cfg:g1-mimic-ppo-cfg --train-cfg.runner.resume --train-cfg.runner.load-run /home/pengyang/codebase/playground/humanoid-dancer/legged_gym/logs/g1_mimic/May08_20-56-29_
+python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl train-cfg:g1-mimic-ppo-cfg --train-cfg.runner.resume --train-cfg.runner.load-run /home/pengyang/codebase/playground/humanoid-dancer/legged_gym/logs/g1_mimic/May12_17-52-38_
 new 
 python legged_gym/scripts/train.py --max-iterations 100000 env-cfg:g1-mimic-cfg --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl train-cfg:g1-mimic-ppo-cfg
 
@@ -27,6 +27,9 @@ python legged_gym/scripts/vis.py env-cfg:h1-mimic-cfg --env-cfg.motion.sync --en
 
 visualize unitree g1 dancing:
 python legged_gym/scripts/vis.py env-cfg:g1-mimic-cfg --env-cfg.motion.sync --env-cfg.viewer.debug_viz --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl
+
+deploy on mujoco:
+python deploy/deploy_mujoco/deploy_mujoco.py env-cfg:g1-mimic-cfg 
 
 TODO:
 1. bug at right hand reference position

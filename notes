@@ -5,6 +5,10 @@
     update v1 asap reward 
 
 
+0514:
+    remove root_vel in observation
+
+
 
 
 TODO:

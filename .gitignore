@@ -1,7 +1,7 @@
 
 legged_gym/resources/
 
-
+*.pt
 *.json
 
 # Byte-compiled / optimized / DLL files
