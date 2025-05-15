@@ -81,15 +81,16 @@ class G1Mimic(G1Robot):
         sin_phase = torch.sin(2 * np.pi * self.phase ).unsqueeze(1)
         cos_phase = torch.cos(2 * np.pi * self.phase ).unsqueeze(1)
 
+
         self.obs_buf = torch.cat((  
                                     # self obs
                                     self.base_ang_vel  * self.obs_scales.ang_vel,
                                     self.projected_gravity,
                                     # self.commands[:, :3] * self.commands_scale * 0, # do not use commands
-                                    (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
+                                    (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos, 
                                     self.dof_vel * self.obs_scales.dof_vel,
                                     self.actions,
-                                    self.base_lin_vel * self.obs_scales.lin_vel,
+                                    self.base_lin_vel * self.obs_scales.lin_vel * 0, # do not use root_vel 
                                     sin_phase,
                                     cos_phase,
                                     
@@ -240,6 +241,8 @@ class G1Mimic(G1Robot):
         
         self.skeleton_trees = [sk_tree] * self.num_envs
         if self.cfg.env.test:
+            import ipdb 
+            ipdb.set_trace()
             self.motion_start_idx = 0
             self._motion_lib.load_motions(
                 skeleton_trees=self.skeleton_trees, gender_betas=[torch.zeros(17)] * self.num_envs, 
@@ -286,6 +289,7 @@ class G1Mimic(G1Robot):
             self.ref_motion_cache['offset'] = offset.clone() if not offset is None else None
         else:
             return self.ref_motion_cache
+        import ipdb;ipdb.set_trace()
         motion_res = self._motion_lib.get_motion_state(motion_ids, motion_times, offset=offset)
         
         # TODO: what the ref motion height if the terrain is not flat?

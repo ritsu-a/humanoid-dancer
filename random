@@ -29,7 +29,8 @@ visualize unitree g1 dancing:
 python legged_gym/scripts/vis.py env-cfg:g1-mimic-cfg --env-cfg.motion.sync --env-cfg.viewer.debug_viz --env-cfg.motion.motion-file /home/pengyang/data/motion/g1/LAFAN1/dance1_subject2_v2.pkl
 
 deploy on mujoco:
-python deploy/deploy_mujoco/deploy_mujoco.py env-cfg:g1-mimic-cfg 
+python deploy/deploy_mujoco/deploy_mujoco.py 
+   !!! note that you should comment every line in legged_gym/utils/__init__.py, since there is circular import issue
 
 TODO:
 1. bug at right hand reference position

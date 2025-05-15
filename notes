@@ -7,6 +7,8 @@
 
 0514:
     remove root_vel in observation
+    in g1_robot, phase is set to have a 0.8s = 2pi
+        it should be changed to motion length
 
 
 
