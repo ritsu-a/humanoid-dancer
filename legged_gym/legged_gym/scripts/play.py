@@ -7,7 +7,7 @@ from legged_gym import LEGGED_GYM_ROOT_DIR
 import tyro
 import isaacgym
 from legged_gym.envs import *
-from legged_gym.utils import  get_args, export_policy_as_jit, task_registry, Logger
+from legged_gym.utils.task_registry import  task_registry
 
 import numpy as np
 import torch

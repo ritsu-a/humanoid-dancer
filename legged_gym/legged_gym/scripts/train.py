@@ -7,7 +7,7 @@ import isaacgym
 from isaacgym import gymapi
 
 from legged_gym.envs import *
-from legged_gym.utils import task_registry
+from legged_gym.utils.task_registry import task_registry
 
 @dataclass  
 class Args:

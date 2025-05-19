@@ -55,8 +55,9 @@ class G1Robot(HumanoidRobot):
     def _post_physics_step_callback(self):
         self.update_feet_state()
 
-        period = 0.8
+        period = self.motion_len
         offset = 0.5
+
         self.phase = (self.episode_length_buf * self.dt) % period / period
         self.phase_left = self.phase
         self.phase_right = (self.phase + offset) % 1

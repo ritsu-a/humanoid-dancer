@@ -241,8 +241,8 @@ class G1Mimic(G1Robot):
         
         self.skeleton_trees = [sk_tree] * self.num_envs
         if self.cfg.env.test:
-            import ipdb 
-            ipdb.set_trace()
+            # import ipdb 
+            # ipdb.set_trace()
             self.motion_start_idx = 0
             self._motion_lib.load_motions(
                 skeleton_trees=self.skeleton_trees, gender_betas=[torch.zeros(17)] * self.num_envs, 
@@ -289,7 +289,7 @@ class G1Mimic(G1Robot):
             self.ref_motion_cache['offset'] = offset.clone() if not offset is None else None
         else:
             return self.ref_motion_cache
-        import ipdb;ipdb.set_trace()
+        # import ipdb;ipdb.set_trace()
         motion_res = self._motion_lib.get_motion_state(motion_ids, motion_times, offset=offset)
         
         # TODO: what the ref motion height if the terrain is not flat?

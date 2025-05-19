@@ -2,7 +2,7 @@
 # policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/g1/model_94800.pt"
 # xml_path: "{LEGGED_GYM_ROOT_DIR}/humanoidverse/data/robots/g1/scene.xml"
 
-policy_path: "/home/pengyang/codebase/playground/humanoid-dancer/legged_gym/logs/g1_mimic/May12_17-52-38_/model_8000.pt"
+policy_path: "/home/pengyang/codebase/playground/humanoid-dancer/deploy/model_1500.pt"
 xml_path: "/home/pengyang/codebase/playground/humanoid-dancer/legged_gym/resources/robots/g1/xml/g1_29dof_anneal_23dof.xml"
 
 # /home/mycode/ASAP/deploy/pre_train/g1/model_94800.pt

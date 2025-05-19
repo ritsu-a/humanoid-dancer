@@ -246,7 +246,7 @@ def main():
         m = mujoco.MjModel.from_xml_path(xml_path); d = mujoco.MjData(m)
         m.opt.timestep = config["simulation_dt"]
         control_step_time = m.opt.timestep * control_decimation
-        ref_motion_length = num_motion_frames * control_step_time
+        # ref_motion_length = num_motion_frames * control_step_time
         print(f"MuJoCo Timestep (dt): {m.opt.timestep:.5f}")
         print(f"Control Frequency: {1.0/control_step_time:.1f} Hz (Decimation: {control_decimation})")
     except Exception as e: print(f"MuJoCo Model Error: {e}"); return
@@ -290,9 +290,11 @@ def main():
                 # --- Control Logic (Runs at lower frequency) ---
                 if sim_step_counter % control_decimation == 0:
 
-                    motion_times = (motion_times + control_step_time) % ref_motion_length
-                    current_phase = motion_times / ref_motion_length if ref_motion_length > 0 else 0.0
-                    phase = motion_times % 0.8 / 0.8 ### this is an error in the g1_robot.py, should be ref_motion_length
+                    motion_times = (motion_times + control_step_time) % _motion_lib.get_motion_length()[0].numpy()
+                    current_phase = motion_times / _motion_lib.get_motion_length().numpy() if _motion_lib.get_motion_length().numpy() > 0 else 0.0
+                    # phase = motion_times % 0.8 / 0.8 ### this is an error in the g1_robot.py, should be ref_motion_length
+                
+                    phase = current_phase
 
                     sin_phase = np.sin(2 * np.pi * phase )
                     cos_phase = np.cos(2 * np.pi * phase )
@@ -314,8 +316,8 @@ def main():
                                                 obs_dict['dof_vel'] * 0.05,
                                                 actions,
                                                 obs_dict['base_lin_vel']* 2.0,
-                                                [sin_phase],
-                                                [cos_phase],
+                                                sin_phase,
+                                                cos_phase,
 
                                                 ### task obs
                                                 obs_dict['diff_local_body_rot_flat'],
