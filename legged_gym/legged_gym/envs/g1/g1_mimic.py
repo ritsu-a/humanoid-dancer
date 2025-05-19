@@ -330,6 +330,14 @@ class G1Mimic(G1Robot):
                 gymutil.draw_lines(sphere_geom_marker, self.gym, self.viewer, self.envs[env_id], sphere_pose) 
                 
     #------------ reward functions----------------
+    def _reward_feet_dist(self):
+        foot_pos = self.rigid_body_states[:, self.feet_indices, :3]
+        foot_dist = torch.norm((foot_pos[:, :2, :] - foot_pos[:, 2:, :]), dim=-1).mean(dim=-1).mean(dim=-1)
+
+        r_foot = torch.exp(-foot_dist / self.cfg.rewards.feet_dist_sigma)
+        return r_foot
+
+
     def _reward_penalty_action_rate(self):
         # Penalize changes in actions
         return torch.sum(torch.square(self.last_actions - self.actions), dim=1)

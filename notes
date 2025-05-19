@@ -10,7 +10,9 @@
     in g1_robot, phase is set to have a 0.8s = 2pi
         it should be changed to motion length
 
-
+0518:
+    fix motion phase 
+    remove root_vel in observation
 
 
 TODO:
@@ -23,4 +25,7 @@ TODO:
 
     https://github.com/Hellod035/LeggedLab
         抄一点reward
+
+
+
 

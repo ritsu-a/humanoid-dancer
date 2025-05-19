@@ -127,7 +127,7 @@ def get_obs(d: mujoco.MjData, motion_res, device: str = "cpu") -> dict:
 
     ### task
     obs["diff_local_body_rot_flat"] = torch_utils.quat_to_tan_norm(diff_local_body_rot_flat).view(-1).numpy()
-    obs["diff_local_root_vel"] = diff_local_root_vel.view(-1).numpy()
+    obs["ref_local_root_vel"] = ref_local_root_vel.view(-1).numpy()
     obs["diff_local_root_ang_vel"] = diff_local_root_ang_vel.view(-1).numpy()
     obs["dof_diff"] = dof_diff.view(-1).numpy()
     obs["dof_vel_diff"] = dof_vel_diff.view(-1).numpy()
@@ -315,13 +315,13 @@ def main():
                                                 (obs_dict['dof_pos'] - default_angles)* 1.0,
                                                 obs_dict['dof_vel'] * 0.05,
                                                 actions,
-                                                obs_dict['base_lin_vel']* 2.0,
+                                                obs_dict['base_lin_vel']* 0.0,
                                                 sin_phase,
                                                 cos_phase,
 
                                                 ### task obs
                                                 obs_dict['diff_local_body_rot_flat'],
-                                                obs_dict['diff_local_root_vel']* 2.0,
+                                                obs_dict['ref_local_root_vel']* 2.0,
                                                 obs_dict['diff_local_root_ang_vel']* 0.25,
                                                 obs_dict['dof_diff']* 1.0,
                                                 obs_dict['dof_vel_diff']* 0.05,
@@ -331,14 +331,14 @@ def main():
                     obs_array = torch.from_numpy(obs_buf).cpu()
                     actions = policy(obs_array).detach().numpy()
 
-
+                 
                     target_dof_pos = actions * 0.25 + default_angles
-
+                  
 
                 # --- Apply PD Control (Using Kp*Scale, Kd*Scale) ---
+
                 tau = pd_control(target_dof_pos, d.qpos[7:], kps,
                                  np.zeros_like(kds), d.qvel[6:], kds) # Use original kds (already scaled)
-
                 tau = np.clip(tau, -tau_limit, tau_limit)
                 d.ctrl[:] = tau
 

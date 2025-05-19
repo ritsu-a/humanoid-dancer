@@ -60,6 +60,8 @@ class Env(g1_config.Env):
 class Rewards(g1_config.Rewards):
     only_positive_rewards: bool = False
     max_contact_force: float = 500.0
+
+    feet_dist_sigma: float = 1.0
     tracking_joint_pos_sigma: float = 1.0
     tracking_joint_vel_sigma: float = 1.0
 
@@ -90,14 +92,14 @@ class Rewards(g1_config.Rewards):
         'left_hip_roll_joint': 0.5,
         'left_hip_yaw_joint': 0.5,
         'left_knee_joint': 0.5,
-        'left_ankle_roll_joint': 0.5,
-        'left_ankle_pitch_joint': 0.5,
+        # 'left_ankle_roll_joint': 0.5,
+        # 'left_ankle_pitch_joint': 0.5,
         'right_hip_pitch_joint': 2.0,
         'right_hip_roll_joint': 0.5,
         'right_hip_yaw_joint': 0.5,
         'right_knee_joint': 0.5,
-        'right_ankle_roll_joint': 0.5,
-        'right_ankle_pitch_joint': 0.5,
+        # 'right_ankle_roll_joint': 0.5,
+        # 'right_ankle_pitch_joint': 0.5,
     })
     
     scales: Dict[str, float] = field(default_factory=lambda: {
@@ -124,7 +126,7 @@ class Rewards(g1_config.Rewards):
         # 'tracking_root_vel': 8.0 * 6,
         # 'tracking_root_ang_vel': 8.0 * 6,
 
-        
+        'feet_dist':1.0,
         'tracking_body_position':1.0,
         'tracking_body_position_feet':3.0,
         'tracking_body_velocity':0.5,
@@ -132,7 +134,7 @@ class Rewards(g1_config.Rewards):
         'tracking_body_rotation':0.5,
         'tracking_body_ang_velocity':0.5,
 
-        'tracking_selected_joint_position': 1.5,
+        'tracking_selected_joint_position': 3.0,
         'tracking_selected_joint_vel': 1.0,
 
         'torques': -0.000001,
