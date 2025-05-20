@@ -33,3 +33,4 @@ python ../deploy/deploy_mujoco/deploy_mujoco.py
    !!! note that you should comment every line in legged_gym/utils/__init__.py, since there is circular import issue
 
 
+python deploy/deploy_real/deploy_real.py enx68da73a3eefc

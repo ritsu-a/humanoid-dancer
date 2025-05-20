@@ -276,7 +276,7 @@ def main():
 
     # --- 6. Initialize Simulation Variables ---
     target_dof_pos = default_angles.copy()
-    motion_index = 0; motion_times = 3.0
+    motion_index = 0; motion_times = 0.0
     prev_action = np.zeros(num_actions, dtype=np.float32)
     action = np.zeros(num_actions, dtype=np.float32)
 
@@ -369,7 +369,16 @@ def main():
 
                 sim_step_counter += 1
 
-               
+                if motion_times > _motion_lib.get_motion_length().numpy():
+                    motion_times = 0.0
+                    motion_index = 0
+                    actions = np.zeros(num_actions, dtype=np.float32)
+                    sim_step_counter = 0
+                    m = mujoco.MjModel.from_xml_path(xml_path); d = mujoco.MjData(m)
+                    m.opt.timestep = config["simulation_dt"]
+                    mujoco.mj_resetData(m, d)
+                    print("Motion index reset to 0.")
+                    continue
 
     except KeyboardInterrupt: print("\nSimulation interrupted by user.")
     except Exception as e: print(f"\nAn error occurred during simulation:\n{traceback.format_exc()}")

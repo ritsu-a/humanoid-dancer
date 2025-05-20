@@ -12,12 +12,12 @@ import yaml
 from tqdm import tqdm
 
 import joblib
-import torch
 import torch.multiprocessing as mp
 import gc
 from enum import Enum
 
 from legged_gym.utils import torch_utils
+import torch
 
 USE_CACHE = False
 print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)

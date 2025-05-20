@@ -26,11 +26,22 @@ simulation_dt: 0.002
 # Controller update frequency (meets the requirement of simulation_dt * controll_decimation=0.02; 50Hz)
 control_decimation: 10
 
+dof_idx: [0, 1, 2, 3, 4, 5, 
+          6, 7, 8, 9, 10, 11,
+          12, 13, 14,
+          15, 16, 17, 18,
+          22, 23, 24, 25]
+
+waist_idx: [19, 20, 21, 
+            26, 27, 28]
+
 kps: [ 100, 100, 100, 200, 20, 20, 
         100, 100, 100, 200, 20, 20, 
         400, 400, 400, 
         90,   60,  20, 60, 
         90,   60,  20, 60 ]
+
+
 
 waist_kps: [
       40, 40, 40,
@@ -46,6 +57,11 @@ kds: [ 2.5, 2.5, 2.5, 5.0, 0.2, 0.1,
 waist_kds: [
       1.0, 1.0, 1.0,
       1.0, 1.0, 1.0
+]
+
+waist_target: [
+      0, 0, 0,
+      0, 0, 0
 ]
 
 default_angles: [ -0.1, 0.0, 0.0, 0.3, -0.2, 0.0, 
