@@ -14,6 +14,10 @@
     fix motion phase 
     remove root_vel in observation
 
+    observation:
+        1. remove dof reward on ankles
+        2. add reward for larger feet distance
+
 
 TODO:
     bayesian optimization or auto RL for hyper-parameter searching

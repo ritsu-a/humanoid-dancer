@@ -253,13 +253,30 @@ def main():
 
     # --- 5. Load  Policy Model ---
     policy = None
-    try:
-        policy = get_policy(policy_path=policy_path)
-    except Exception as e: print(f"Policy Model Error: {e}"); return
+
+    if "model" in policy_path:
+        try:
+            policy = get_policy(policy_path=policy_path)
+            print(f"Loaded policy model: {policy_path}")
+
+        except Exception as e: print(f"Policy Model Error: {e}"); return
+    else:
+        try:
+    
+            models = [file for file in os.listdir(policy_path) if 'model' in file]
+            models.sort(key=lambda m: '{0:0>15}'.format(m))
+            model = models[-1]
+            
+            policy_path = os.path.join(policy_path, model)
+            policy = get_policy(policy_path=policy_path)
+        
+            print(f"Loaded policy model: {policy_path}")
+    
+        except Exception as e: print(f"Policy Model Error: {e}"); return
 
     # --- 6. Initialize Simulation Variables ---
     target_dof_pos = default_angles.copy()
-    motion_index = 0; motion_times = 0.0
+    motion_index = 0; motion_times = 3.0
     prev_action = np.zeros(num_actions, dtype=np.float32)
     action = np.zeros(num_actions, dtype=np.float32)
 
@@ -289,6 +306,8 @@ def main():
 
                 # --- Control Logic (Runs at lower frequency) ---
                 if sim_step_counter % control_decimation == 0:
+
+                    
 
                     motion_times = (motion_times + control_step_time) % _motion_lib.get_motion_length()[0].numpy()
                     current_phase = motion_times / _motion_lib.get_motion_length().numpy() if _motion_lib.get_motion_length().numpy() > 0 else 0.0
@@ -349,6 +368,8 @@ def main():
                     time.sleep(time_until_next_step)
 
                 sim_step_counter += 1
+
+               
 
     except KeyboardInterrupt: print("\nSimulation interrupted by user.")
     except Exception as e: print(f"\nAn error occurred during simulation:\n{traceback.format_exc()}")

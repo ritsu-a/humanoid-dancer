@@ -61,7 +61,7 @@ class Rewards(g1_config.Rewards):
     only_positive_rewards: bool = False
     max_contact_force: float = 500.0
 
-    feet_dist_sigma: float = 1.0
+    feet_dist_sigma: float = 2.0
     tracking_joint_pos_sigma: float = 1.0
     tracking_joint_vel_sigma: float = 1.0
 
@@ -126,7 +126,7 @@ class Rewards(g1_config.Rewards):
         # 'tracking_root_vel': 8.0 * 6,
         # 'tracking_root_ang_vel': 8.0 * 6,
 
-        'feet_dist':1.0,
+        # 'feet_dist':0.5,
         'tracking_body_position':1.0,
         'tracking_body_position_feet':3.0,
         'tracking_body_velocity':0.5,

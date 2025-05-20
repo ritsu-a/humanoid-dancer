@@ -334,7 +334,7 @@ class G1Mimic(G1Robot):
         foot_pos = self.rigid_body_states[:, self.feet_indices, :3]
         foot_dist = torch.norm((foot_pos[:, :2, :] - foot_pos[:, 2:, :]), dim=-1).mean(dim=-1).mean(dim=-1)
 
-        r_foot = torch.exp(-foot_dist / self.cfg.rewards.feet_dist_sigma)
+        r_foot = torch.exp(foot_dist / self.cfg.rewards.feet_dist_sigma)
         return r_foot
 
 
